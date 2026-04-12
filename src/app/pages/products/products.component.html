@@ -1,0 +1,126 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-semibold text-gray-100">Products Management</h2>
+    <button mat-raised-button color="primary" (click)="showAddProductModal = true"
+      class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-orange-600 to-amber-600 rounded-md hover:from-orange-700 hover:to-amber-700 transition-all shadow-lg">
+      <mat-icon>add</mat-icon>
+      Add Product
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex items-center justify-center py-12">
+    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded mb-6">
+    {{ error }}
+  </div>
+
+  <!-- Products Table -->
+  <div *ngIf="!loading && !error"
+    class="bg-gray-900/90 rounded-lg shadow-xl border border-orange-800/30 overflow-hidden">
+    <div class="overflow-x-auto">
+      <table mat-table [dataSource]="products" class="min-w-full divide-y divide-gray-700">
+        <ng-container matColumnDef="image">
+          <th mat-header-cell *matHeaderCellDef
+            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            Product
+          </th>
+          <td mat-cell *matCellDef="let product" class="px-6 py-4 whitespace-nowrap">
+            <div class="flex items-center">
+              <div class="h-16 w-16 flex-shrink-0 mr-4 bg-gray-800 rounded-lg overflow-hidden">
+                <img *ngIf="product.imageUrl"
+                  [src]="product.imageUrl.startsWith('data:') ? product.imageUrl : 'data:image/jpeg;base64,' + product.imageUrl"
+                  [alt]="product.name" class="h-16 w-16 object-contain" (error)="handleImageError($event)">
+                <mat-icon *ngIf="!product.imageUrl" class="h-16 w-16 text-gray-500 p-2">image</mat-icon>
+              </div>
+              <div>
+                <div class="text-base font-medium text-gray-200">{{ product.name }}</div>
+                <div class="text-sm text-gray-400">SKU: {{ product.sku || 'N/A' }}</div>
+              </div>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="category">
+          <th mat-header-cell *matHeaderCellDef
+            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            Category
+          </th>
+          <td mat-cell *matCellDef="let product" class="px-6 py-4 whitespace-nowrap">
+            <mat-chip-list>
+              <mat-chip class="bg-orange-900/50 text-orange-300">
+                {{ getCategoryName(product.categoryId) }}
+              </mat-chip>
+            </mat-chip-list>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef
+            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            Price
+          </th>
+          <td mat-cell *matCellDef="let product" class="px-6 py-4 whitespace-nowrap">
+            <div class="text-base font-medium text-gray-200">
+              {{ product.price | currency:'DA ':'symbol':'1.2-2' }}
+            </div>
+            <div *ngIf="product.isOnSale" class="text-sm text-green-400">
+              Sale: {{ product.salePrice | currency:'DA ':'symbol':'1.2-2' }}
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef
+            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            Status
+          </th>
+          <td mat-cell *matCellDef="let product" class="px-6 py-4 whitespace-nowrap">
+            <mat-chip [class.bg-green-900/30]="product.isAvailable" [class.bg-red-900/30]="!product.isAvailable"
+              [class.text-green-400]="product.isAvailable" [class.text-red-400]="!product.isAvailable">
+              {{ product.isAvailable ? 'In Stock' : 'Out of Stock' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef
+            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+            Actions
+          </th>
+          <td mat-cell *matCellDef="let product" class="px-6 py-4 whitespace-nowrap">
+            <div class="flex space-x-2">
+              <button mat-icon-button [matMenuTriggerFor]="menu" class="text-gray-400 hover:text-gray-200">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #menu="matMenu" class="bg-gray-800">
+                <button mat-menu-item (click)="openEditModal(product)" class="text-gray-200 hover:bg-gray-700">
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit</span>
+                </button>
+                <button mat-menu-item (click)="deleteProduct(product.id)" class="text-red-400 hover:bg-gray-700">
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete</span>
+                </button>
+              </mat-menu>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="['image', 'category', 'price', 'status', 'actions']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['image', 'category', 'price', 'status', 'actions'];"
+          class="hover:bg-gray-800/50 transition-colors"></tr>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="products.length === 0" class="text-center py-12">
+      <mat-icon class="h-16 w-16 text-gray-600 mx-auto mb-4">inventory_2</mat-icon>
+      <h3 class="text-lg font-medium text-gray-400 mb-2">No products found</h3>
+      <p class="text-gray-500">Get started by adding your first product</p>
+    </div>
+  </div>
+</div>

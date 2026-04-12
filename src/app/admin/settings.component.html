@@ -1,0 +1,11 @@
+<div>
+  <h2>Settings</h2>
+  <div *ngIf="error" style="color:#c00;">{{ error }}</div>
+  <div *ngIf="loading">Loading...</div>
+
+  <div style="display:flex;gap:12px;align-items:center;">
+    <label>Default deactivation period (days)</label>
+    <input type="number" [(ngModel)]="deactivationPeriodDays" min="1" max="3650" />
+    <button (click)="save()" [disabled]="loading">Save</button>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div>
+  <h2>Users</h2>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+    <button (click)="setRole('DRIVER')" [disabled]="role==='DRIVER'">Drivers</button>
+    <button (click)="setRole('SUPERMARKET')" [disabled]="role==='SUPERMARKET'">Stores</button>
+    <input [(ngModel)]="q" placeholder="Search name or email" />
+    <button (click)="search()">Search</button>
+  </div>
+  <div *ngIf="error" style="color:#c00;">{{ error }}</div>
+  <div *ngIf="loading">Loading...</div>
+  <table *ngIf="!loading" border="1" cellspacing="0" cellpadding="6">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of users">
+        <td>{{ u.name }}</td>
+        <td>{{ u.email }}</td>
+        <td>{{ u.role }}</td>
+        <td>{{ u.status }}</td>
+        <td>
+          <button (click)="toggleStatus(u)">{{ u.status==='SUSPENDED' ? 'Enable' : 'Disable' }}</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div style="margin-top:12px;display:flex;gap:8px;">
+    <button (click)="page=page-1; load()" [disabled]="page<=1">Prev</button>
+    <span>Page {{ page }} of {{ pages }}</span>
+    <button (click)="page=page+1; load()" [disabled]="page>=pages">Next</button>
+  </div>
+</div>
