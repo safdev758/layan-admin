@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://layanbackend-production.up.railway.app/api/v1'
+  apiUrl: 'https://layanbackend-staging.up.railway.app/api/v1'
 };
